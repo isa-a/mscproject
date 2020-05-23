@@ -6,16 +6,16 @@ Created on Sun May 17 06:29:00 2020
 @author: isa
 """
 from scipy.integrate import solve_ivp
- import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 
 #creating function with the LV equations within it, first listing all parameters
-def lotkavolterra(t, X, K, R, C, rR, rC, alphaCR, alphaRC):
-     dR, dC = X
+def lotkavolterra(t, X, K, rR, rC, alphaCR, alphaRC):
+     R, C = X
      return [(rR*R)*((K - R- (alphaCR*C)) / K), (rC*C)*((K - C - (alphaRC*R)) / K)]
 
 
 
-solve = solve_ivp(lotkavolterra, [0, 15], [0.001, 100], args=(1000, 1000, 1000, 1, 1, 0.8, 0.8), dense_output=True) #passing through the values into the scipy solver
+solve = solve_ivp(lotkavolterra, [0, 15], [50, 500], args=(1000, 1, 1, 0.8, 0.8), dense_output=True) #passing through the values into the scipy solver
 
 
 
