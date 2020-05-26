@@ -10,13 +10,13 @@ import matplotlib.pyplot as plt
 from numpy import *
 
 #creating function with the LV equations within it, first listing all parameters
-def lotkavolterra(t, X, K, rR, rC, rC2, alphaCR, alphaRC, alphaC2R, alphaC2C):
+def lotkavolterra(t, X, K, rR, rC, rC2, alphaCR, alphaRC, alphaC2R, alphaC2C, alphaCC2, alphaRC2):
      R, C, C2 = X
-     return [(rR*R)*((K - R- (alphaCR*C)) / K), (rC*C)*((K - C - (alphaRC*R)) / K), (rC2*C2)*((K - C2 - (alphaC2R*C2) - (alphaC2C*C2)) / K)]
+     return [(rR*R)*((K - R- (alphaCR*C) - (alphaCC2*C)) / K),     (rC*C)*((K - C - (alphaRC*R) - (alphaRC2*R)) / K),     (rC2*C2)*((K - C2 - (alphaC2R*C2) - (alphaC2C*C2)) / K)]
 
 
 
-solve = solve_ivp(lotkavolterra, [0, 100], [50, 200, 350], args=(1000, 1, 1, 1, 0.8, 0.8, 0.8, 0.46), dense_output=True) #passing through the values into the scipy solver
+solve = solve_ivp(lotkavolterra, [0, 100], [50, 200, 350], args=(1000, 1, 1, 1, 0.8, 0.8, 0.8, 0.46, 0.52, 0.36), dense_output=True) #passing through the values into the scipy solver
 
 
 
