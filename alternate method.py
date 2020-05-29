@@ -28,3 +28,16 @@ plt.title('Lotka-Volterra System')
 plt.show()
 
 
+#############################################################################################
+
+Number = 3
+
+for i in range(1, Number):
+    grwth = [f"rC{i}" for i in range(1, Number)]
+    #alpha = [f"alpha{i}" for i in range(1, Number)]
+    X_List = [f"C{i}" for i in range(1, Number)]
+print(grwth)
+print(alpha)
+print(X_List)
+
+
