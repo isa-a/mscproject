@@ -49,11 +49,13 @@ params = (grwth,alpha,X_List, Capacity)
 
 #eqn = (grwth[0]*X_List[0])*((Capacity[0] - X_List[0] - ))
 
-alpha 
 
 sum = 0
 for j in range (0, Number-1):
     sum = alpha{j}*C{j}
+
+
+
 
 
 
