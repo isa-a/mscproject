@@ -11,13 +11,29 @@ from numpy import *
 import numpy as np
 
 #creating function with the LV equations within it, first listing all parameters
-def lotkavolterra(t, X, Kr, Kc, Kc2, rR, rC, rC2, alphaCR, alphaRC, alphaC2R, alphaC2C, alphaCC2, alphaRC2):
-     R, C, C2 = X
-     return [(rR*R)*((Kr - R - (alphaCR*C) - (alphaC2R*C2)) / Kr),     (rC*C)*((Kc - C - (alphaRC*R) - (alphaC2C*C2)) / Kc),     (rC2*C2)*((Kc2 - C2 - (alphaCC2*C) - (alphaRC2*R)) / Kc2)]
+def lotkavolterra(t, X, N, K, r, alpha):
+                  #, Kr, Kc, Kc2, rR, rC, rC2, alphaCR, alphaRC, alphaC2R, alphaC2C, alphaCC2, alphaRC2):
+    dXdt = []
+    for i in range(N):
+        sum = 0
+        for j in range(N):
+            sum = sum + alpha[j,i] * X[j]
+        dX = r[i] * X[i] * ((K[i] - sum) / K[i])
+        dXdt.append(dX)
+    return(dXdt)
+     
+
+#create params
+N = 3
+t = [0,100]
+X = [50,200,350]
+K = [1000, 500, 430]
+r = [1,1,1]
+alpha = np.array([[1, 0.5, 0.2], [0.3, 1, 0.4], [1.2, 0, 1]])
 
 
+solve = solve_ivp(lotkavolterra, t, X, args=(K, r, alpha), dense_output=True)
 
-solve = solve_ivp(lotkavolterra, [0, 100], [50, 200, 350], args=(1000, 500, 430, 1, 1, 1, 0.8, 0.8, 0.8, 0.46, 0.52, 0.36), dense_output=True) #passing through the values into the scipy solver
 
 
 
@@ -49,10 +65,6 @@ params = (grwth,alpha,X_List, Capacity)
 
 #eqn = (grwth[0]*X_List[0])*((Capacity[0] - X_List[0] - ))
 
-
-sum = 0
-for j in range (0, Number-1):
-    sum = alpha{j}*C{j}
 
 
 
