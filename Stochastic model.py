@@ -40,7 +40,7 @@ def stochasticR2(Br, Dr):
 
 Br = 1.0
 Dr = 0.8
-tspan = np.linspace(0.0, 5.0, 5001)
+tspan = [0,100]
 x0 = 0.1
 
 
@@ -64,29 +64,23 @@ def tauleap(Tinit, Tmax, R, C, K, rR, rC, alphaRC, alphaCR, tau = 0.001):
         Ra.append(R)
         Ca.append(C)
 
-        # Rates
         Br = rR * R
         Bc = rC * C
         Dr = rR/K * R * (R + alphaRC * C)
         Dc = rC/K * C * (C + alphaCR * R)
 
-        # Constant step sizes. Choose to be small
-        t += tau
+    #    t += tau
 
-        # Choose tau based on Cao et al 2005. Or use max rate from theory (rK/4)
-        # tau = epsilon / max(B_R, B_C, D_R, D_C)
+      #  R += (np.random.poisson(B_R * tau, 1) - np.random.poisson(D_R * tau, 1))[0]
+        #C += (np.random.poisson(B_C * tau, 1) - np.random.poisson(D_C * tau, 1))[0]
 
-        # Rates, Poisson d0.0001istributed. First term is 'birth', second is 'death'. cf ODEs
-        R += (np.random.poisson(B_R * tau, 1) - np.random.poisson(D_R * tau, 1))[0]
-        C += (np.random.poisson(B_C * tau, 1) - np.random.poisson(D_C * tau, 1))[0]
+       # if R < 0:
+         #   R = 0
+      #  if C < 0:
+        #    C = 0
 
-        if R < 0:
-            R = 0
-        if C < 0:
-            C = 0
-
-    ta = [t + t_init for t in ta]
-    return(ta, Ra, Ca)
+   # ta = [t + t_init for t in ta]
+  #  return(ta, Ra, Ca)
 
 
 
