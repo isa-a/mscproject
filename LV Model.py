@@ -32,14 +32,14 @@ r = [1,1,1]
 alpha = np.array([[1, 0.5, 0.2], [0.3, 1, 0.4], [1.2, 0, 1]])
 
 
-solve = solve_ivp(lotkavolterra, t, X, args=(K, r, alpha), dense_output=True)
+solve = solve_ivp(lotkavolterra, t, X, args=(N, K, r, alpha), dense_output=True)
 
 
 
 
 t = linspace(0, 100, 100) #start and stop times and the no. of samples to generate
-X = solve.sol(t)
-plt.plot(t, X.T)
+Xsolve = solve.sol(t)
+plt.plot(t, Xsolve.T)
 plt.legend(['R', 'C','C2'])
 plt.title('Lotka-Volterra System')
 plt.show()
