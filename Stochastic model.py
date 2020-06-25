@@ -30,7 +30,7 @@ from numba import jit
 
 
 
-@jit(nopython=True)
+@jit(nopython=True)#increase speed of function
 def gillespy(Tinit, Tmax, R, C, K, rR, rC, alphaRC, alphaCR): #function with args
     ta = []
     Ra = []
@@ -43,7 +43,7 @@ def gillespy(Tinit, Tmax, R, C, K, rR, rC, alphaRC, alphaCR): #function with arg
     while (t < Tmax - Tinit): #time step to integrate over
         ta.append(t)
         Ra.append(R)
-        Ca.append(C)
+        Ca.append(C)#adding to lists
 
         Br = rR * R
         Bc = rC * C
@@ -53,32 +53,47 @@ def gillespy(Tinit, Tmax, R, C, K, rR, rC, alphaRC, alphaCR): #function with arg
         R_sum = Br + Bc + Dr + Dc
         if (R_sum == 0): #if the population size is zero nothing will happen/can be done, so we must ensure the system ends if it is somehow zero
             break
-        value1 = random.random()
+        value1 = random.random()#generate random time 
         t += -log(value1)/R_sum
 
-        value2 = random.random()
-        if (u2 < Br/R_sum):
+        value2 = random.random()#generate random population
+        if (value2 < Br/R_sum):
             R += 1
-        elif (u2 > Br/R_sum and u2 < (Br + Dr)/R_sum):
+        elif (value2 > Br/R_sum and value2 < (Br + Dr)/R_sum):
             R -= 1
-        elif (u2 > (Br + Dr)/R_sum and u2 < (Br + Dr + Bc)/R_sum):
+        elif (value2 > (Br + Dr)/R_sum and value2 < (Br + Dr + Bc)/R_sum):
             C += 1
         else:
             C -= 1
 
-    ta = [t + t_init for t in ta]
+    ta = [t + Tinit for t in ta]
     return(ta, Ra, Ca)
+
+
+#timestep = [0,100]
+#popsizes = [100,500]
+#carryingcap = [1000]
+#growthterms = [1.032,1.032]
+#alphaterms = [1.5,1.3]    
+
+
+
+
+def plotgillespie():
+    results = gillespy(0,100,100,500,1000,1.032,1.032,1.3,0.3)#storing the model
     
     
+    pops = np.transpose(np.array([results[1], results[2]]))#writing results as a matrix
     
-gillespy(0.5, 0.73, 10, 1000, 1000, 1.032, 1.032, 1, 1)
+    plt.plot(results[0], pops)#plotting
+    plt.ylim(0,(max(results[2])))#adjusting axis
+    plt.title('Stochastic System')
+    plt.xlabel('Time')
+    plt.ylabel('Population')
+    plt.legend(['R', 'C'])
 
-
-
-
-
-
-
+    #np.array([results[1], results[2]]).shape
+plotgillespie()
 
 ###############################################################################
 #tau leaping
@@ -123,9 +138,13 @@ def tauleap(T_init, T_max, Res, Chal, K, r_res, r_chal, alphaRC, alphaCR, tau):#
     return(ta, Ra, Ca)
 
 
-tauleap(0.5, 0.73, 10, 1000, 1000, 1.032, 1.032, 1, 1, 0.09)
+tauplot = tauleap(0, 100, 10, 1000, 1000, 1.032, 1.032, 1, 1, 1)
 
 
+taupops = np.transpose(np.array([tauplot[1], tauplot[2]]))
+
+plt.plot(tauplot[0], taupops)
+plt.ylim(0,(max(results[2])))
 
 
 
@@ -141,12 +160,13 @@ tauleap(0.5, 0.73, 10, 1000, 1000, 1.032, 1.032, 1, 1, 0.09)
 N = 3
 
 @jit(nopython=True)
-def tauNspecies(T_init, T_max, Chal, K, r_chal, alpha, tau):#function make with tau
+def tauNspecies(N, T_init, T_max, Chal, K, r_chal, alpha, tau):#function make with tau
     ta = []
     Ca = [] #lists to append to 
 
     t = 0
-    C = Chal
+    for i in range(N):
+        C = Chal[i]
     
     while (t < T_max - T_init):
         
@@ -179,8 +199,113 @@ def tauNspecies(T_init, T_max, Chal, K, r_chal, alpha, tau):#function make with 
     return(ta, Ca)
 
 
-tauNspecies(0.5, 0.73, 10, 1000, 1000, 1.032, 1.032, 1, 1, 0.09)
+tauNspecies(3, 0.5, 0.73, 10, 1000, 1000, 1.032, 1.032, 1, 1, 0.09)
 
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+def gillespie(Time, Populations, K, Growth, Alphas): #function with args
+    ta = []
+    Ra = []
+    Ca = [] #empty lists to append to
+
+    t = 0
+    R = Populations[0]
+    C = Populations[1] 
+    
+    while (t < Time[1] - Time[0]): #time step to integrate over
+        ta.append(t)
+        Ra.append(R)
+        Ca.append(C)
+
+        Br = Growth[0] * Populations[0]
+        Bc = Growth[1] * Populations[1]
+        Dr = Growth[0]/K * Populations[0] * (Populations[0] + Alphas[0] * Populations[1])
+        Dc = Growth[1]/K * Populations[1] * (Populations[1] + Alphas[1] * Populations[0]) #defining probabilities 
+
+        R_sum = Br + Bc + Dr + Dc
+        if (R_sum == 0): #if the population size is zero nothing will happen/can be done, so we must ensure the system ends if it is somehow zero
+            break
+        value1 = random.random()
+        t += -log(value1)/R_sum
+
+        value2 = random.random()
+        if (value2 < Br/R_sum):
+            R += 1
+        elif (value2 > Br/R_sum and value2 < (Br + Dr)/R_sum):
+            R -= 1
+        elif (value2 > (Br + Dr)/R_sum and value2 < (Br + Dr + Bc)/R_sum):
+            C += 1
+        else:
+            C -= 1
+
+    ta = [t + Time[0] for t in ta]
+    return(ta, Ra, Ca)
+
+
+Time = [0,100]
+Populations = [100,500]
+K = [1000]
+Growth = [1.032,1.032]
+Alphas = [1.5,1.3]    
+
+Time = np.asarray(Time)
+Populations = np.asarray(Populations)
+K = np.asarray(K)
+Growth = np.asarray(Growth)
+Alphas = np.asarray(Alphas)
+
+
+model = gillespie(Time, Populations, K, Growth, Alphas)
+
+
+
+gilpop = np.transpose(np.array([model[1], model[2]]))
+gilpop.shape
+plt.plot(model[0], model[1])
+plt.ylim(0,(max(results[2])))
+
+
+len(results[2])
+
+np.array([results[1], results[2]]).shape
