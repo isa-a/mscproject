@@ -178,7 +178,8 @@ def tauNspecies(N, T_init, T_max, Chal, K, r_chal, alpha, tau):#function make wi
                 sum += alpha[x,i] * C[x]
             for k in range(N):
                 Dc = r_chal[k]/K * C[k] * (C[k] + sum)#all probabilities 
-            
+        C += (np.random.poisson(Bc * tau, 1) - np.random.poisson(Dc * tau, 1))[0] 
+           
        
         ta.append(t)
         Ca.append(C)#iteratively adding to each list
@@ -190,7 +191,6 @@ def tauNspecies(N, T_init, T_max, Chal, K, r_chal, alpha, tau):#function make wi
         t += tau
         #t = t + tau
 
-        C += (np.random.poisson(Bc * tau, 1) - np.random.poisson(Dc * tau, 1))[0] 
 
         if C < 0:
             C = 0 #setting pops to 0 in case of negative values (not possible)
