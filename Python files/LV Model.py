@@ -26,24 +26,24 @@ def lotkavolterra(t, X, N, K, r, alpha):
 #create params
 N = 3
 t = [0,100]
-X = [50,200,350]
-K = [1000, 500, 430]
+X =  [750, 900, 1250] 
+K = [1500, 1500, 1500]
 r = [1,1,1]
-alpha = np.array([[1, 0.5, 0.2], [0.3, 1, 0.4], [1.2, 0, 1]])
+alpha = array([[1, 0.5, 0.4], [0.4, 1, 0.63], [1.2, 0, 1]])
 
 
 solve = solve_ivp(lotkavolterra, t, X, args=(N, K, r, alpha), dense_output=True)
 
 
 
-
-t = linspace(0, 100, 100) #start and stop times and the no. of samples to generate
-Xsolve = solve.sol(t)
-plt.plot(t, Xsolve.T)
-plt.legend(['R', 'C','C2'])
-plt.title('Lotka-Volterra System')
-plt.show()
-
+def plotODE():
+    t = linspace(0, 100, 100) #start and stop times and the no. of samples to generate
+    Xsolve = solve.sol(t)
+    plt.plot(t, Xsolve.T)
+    plt.legend(['R', 'C','C2'])
+    plt.title('Lotka-Volterra System')
+    plt.show()
+plotODE()
 
 #############################################################################################
 
