@@ -24,6 +24,10 @@ import numpy as np
 import gillespy2
 from sdeint import *
 from numba import jit
+import elfi
+import scipy.stats as ss
+from scipy.stats import poisson
+from graphviz import Digraph
 
 ###############################################################################
 #tau leaping
@@ -31,7 +35,7 @@ from numba import jit
 N = 3
 
 @jit(nopython=True)
-def tauNspecies(t, X, N, K, r, alpha, tau):
+def tauNspecies(t, X, N, K, r, alpha, tau, batch_size=1, random_state=None):
     # Time steps
     ta = [0]
 
@@ -53,9 +57,12 @@ def tauNspecies(t, X, N, K, r, alpha, tau):
             birth_rate = r[pop_i] * Xa[pop_i][step_idx]
             death_rate = 0
             for pop_j in range(N):
-                death_rate += (r[pop_i] * Xa[pop_i][step_idx]) * (alpha[pop_i, pop_j] * Xa[pop_j][step_idx] / K[pop_i])
+                death_rate += (r[pop_i] * Xa[pop_i][step_idx]) * (alpha[pop_j, pop_i] * Xa[pop_j][step_idx] / K[pop_i])
+          #  print(birth_rate)
+            #print(death_rate)
             population_change = (np.random.poisson(birth_rate * tau, 1) -
                                  np.random.poisson(death_rate * tau, 1))[0]
+           # print('pop change' + str(population_change))
             new_size = Xa[pop_i][step_idx] + population_change
             if new_size >= 0:
                 Xa[pop_i].append(new_size)
@@ -74,114 +81,95 @@ N = 3
 t = 100 # max time, starting from zero
 tau = 0.01 # time step size
 X = [750, 900, 1250] # initial population sizes
-K = [1500, 1500, 1500] # carrying capacities
-r = [1, 1, 1] # growth rates
+K = [10000,10000,10000] # carrying capacities
+r = [1, 1,1] # growth rates
 # Competition - must have '1' on the diagonal
-alpha = array([[1, 0.5, 0.4], [0.4, 1, 0.63], [1.2, 0, 1]])
+alpha = array([[1, 1, 0.2], [0.5, 1, 0.34], [1,0.9, 1]])
 ta, Xa = tauNspecies(t, X, N, K, r, alpha, tau)
 
-
-
-for pop in Xa:
-    plt.plot(ta, pop)
-    plt.ylim(0,1000)
-    plt.legend(['R', 'C','C2','C3','C4'])
     
 
 
-def plottau():
-    N = 3
-    t = 100 # max time, starting from zero
-    tau = 0.01 # time step size
-    X = [750, 900, 1250] # initial population sizes
-    K = [1500, 1500, 1500] # carrying capacities
-    r = [1, 1, 1] # growth rates
-    # Competition - must have '1' on the diagonal
-    alpha = array([[1, 0.5, 0.4], [0.4, 1, 0.63], [1.2, 0, 1]])
-    ta, Xa = tauNspecies(t, X, N, K, r, alpha, tau)
-    
-    for pop in Xa:
-        plt.plot(ta, pop)
-        plt.ylim(0,1000)
-        plt.legend(['R', 'C','C2','C3','C4'])
+def plottau(ta, Xa):    
+    for index, pop in enumerate(Xa):
+        #print(ta)
+       # print(pop)
+        plt.plot(ta, pop, label = 'Population '+str(index))
+    plt.legend()
 
     
     
     plt.title('Stochastic System')
     plt.xlabel('Time')
     plt.ylabel('Population')
-plottau()
-
-
+plottau(ta, Xa)
 
 
 ###############################################################################
-#gillespie
+
+
+#elfi
+
+
+def popdraw(t, X, N, K, r, alpha, tau, value1, value2, batch_size=1, random_state=None):
+        # Time steps
+    ta = [0]
+
+    # Set up initial condition for each population
+    # List of lists - each population is a list item
+    # Each population list Xa[i][j] is the population i size at ta[j]
+    Xa = list()
+    for pop in X:
+        Xa.append([pop])
+
+    # Xa = [[50], [200], [350]]
+    # Xa[0] = [50]
+    # Xa[0][0] = 50
+    t_current = 0
+    step_idx = 0
+    while (t_current < t):
+
+        for pop_i in range(N):
+            birth_rate = r[pop_i] * Xa[pop_i][step_idx]
+            death_rate = 0
+            for pop_j in range(N):
+                death_rate += (r[pop_i] * Xa[pop_i][step_idx]) * (alpha[pop_j, pop_i] * Xa[pop_j][step_idx] / K[pop_i])
+          #  print(birth_rate)
+            #print(death_rate)
+            value1, value2 = (np.random.poisson(birth_rate * tau, 1) -
+                                 np.random.poisson(death_rate * tau, 1))[0]
+           # print('pop change' + str(population_change))
+            new_size = Xa[pop_i][step_idx] + population_change
+            if new_size >= 0:
+                Xa[pop_i].append(new_size)
+            else:
+                Xa[pop_i].append(0)
+
+        step_idx += 1
+        t_current += tau
+        ta.append(t_current)
+
+    #ta = [t + T_init for t in ta]
+    return poisson.rvs(value1, value2, size=1000, size=(batch_size, 30), random_state=random_state)
+
+
+def log_destack(final_pops):
+    x = final_pops.flatten().reshape(1, -1)
+    return(np.log(np.fmax(x, np.zeros(x.shape)) + 1))
+
+alpha = elfi.Prior(ss.poisson, 0, 2)
+t = elfi.Prior(ss.poisson, 0, 3)
 
 
 
-@jit(nopython=True)#increase speed of function
-def gillespy(Tinit, Tmax, R, C, K, rR, rC, alphaRC, alphaCR): #function with args
-    ta = []
-    Ra = []
-    Ca = [] #empty lists to append to
-
-    t = 0
-    R = R
-    C = C 
-    
-    while (t < Tmax - Tinit): #time step to integrate over
-        ta.append(t)
-        Ra.append(R)
-        Ca.append(C)#adding to lists
-
-        Br = rR * R
-        Bc = rC * C
-        Dr = rR/K * R * (R + alphaRC * C)
-        Dc = rC/K * C * (C + alphaCR * R) #defining probabilities 
-
-        R_sum = Br + Bc + Dr + Dc
-        if (R_sum == 0): #if the population size is zero nothing will happen/can be done, so we must ensure the system ends if it is somehow zero
-            break
-        value1 = random.random()#generate random time 
-        t += -log(value1)/R_sum
-
-        value2 = random.random()#generate random population
-        if (value2 < Br/R_sum):
-            R += 1
-        elif (value2 > Br/R_sum and value2 < (Br + Dr)/R_sum):
-            R -= 1
-        elif (value2 > (Br + Dr)/R_sum and value2 < (Br + Dr + Bc)/R_sum):
-            C += 1
-        else:
-            C -= 1
-
-    ta = [t + Tinit for t in ta]
-    return(ta, Ra, Ca)
+y_obs = tauNspecies(t, X, N, K, r, alpha, tau)
 
 
-#timestep = [0,100]
-#popsizes = [100,500]
-#carryingcap = [1000]
-#growthterms = [1.032,1.032]
-#alphaterms = [1.5,1.3]    
+vectorized_simulator = elfi.tools.vectorize(tauNspecies, [2, 3])
 
 
+Y = elfi.Simulator(vectorized_simulator, alpha, t, observed=y_obs)
 
+S = elfi.Summary(log_destack, Y)
 
-def plotgillespie():
-    results = gillespy(0,100,10,10,500,1.032,1.032,1,1)#storing the model
-    
-    
-    pops = np.transpose(np.array([results[1], results[2]]))#writing results as a matrix
-    
-    plt.plot(results[0], pops)#plotting
-    plt.ylim(0,(max(results[2])))#adjusting axis
-    plt.title('Stochastic System')
-    plt.xlabel('Time')
-    plt.ylabel('Population')
-    plt.legend(['R', 'C'])
-
-    #np.array([results[1], results[2]]).shape
-plotgillespie()
-
+d = elfi.Distance('euclidean', S)
