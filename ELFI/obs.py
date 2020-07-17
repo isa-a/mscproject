@@ -27,3 +27,9 @@ r = [1, 1] # growth rates
 # Competition - must have '1' on the diagonal
 alpha = array([[1, 1.5], [0.5, 1]])
 ta, Xa = tauNspecies(t, X, N, K, r, alpha, tau)
+
+# measurement_times = np.linspace(0, 100, 10)
+measurement_times = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
+measurement_times = measurement_times / tau
+Xa = Xa[measurement_times, :]
+ta = ta[measurement_times]
