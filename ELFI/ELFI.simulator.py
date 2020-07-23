@@ -10,21 +10,19 @@ from scipy.integrate import solve_ivp
 import matplotlib.pyplot as plt
 from numpy import *
 import numpy as np
-import gillespy2
-from sdeint import *
 from numba import jit
 import elfi
 import scipy.stats as ss
 from scipy.stats import poisson
-from graphviz import Digraph
+#from graphviz import Digraph
 
 #import SDE sim from seperate file and observed data from seperate file
 from SDEint import tauNspecies
-from obs import t, X, N, K, r, measurement_times
+from obs import t, X, N, K, r, tau, measurement_idx
 from obs import ta,Xa
 
 
-observeddata = ta, Xa
+observeddata = Xa
 
 #wrap create
 def tauWrapper(t, X, N, K, r, alpha1, alpha2, tau, measurement_times,
@@ -33,9 +31,8 @@ def tauWrapper(t, X, N, K, r, alpha1, alpha2, tau, measurement_times,
     alpha = np.array([[1, alpha1], [alpha2, 1]])
     times, pops = tauNspecies(t, X, N, K, r, alpha, tau)
 
-    measured_pop = pops[measurement_times, :]
-
-    return(np.asarray(measured_pop))
+    measured_pop = np.array(pops)[:, measurement_times]
+    return(measured_pop)
 #tauWrapper(100, [780, 300], 2, [1000,1000], [1,1], array([[1, alphaprior1], [alphaprior2, 1]]), 0.01)
 
 
@@ -49,7 +46,7 @@ alphaprior2 = elfi.Prior(ss.uniform, 0, 5)
 vectorized_sim = elfi.tools.vectorize(tauWrapper, [0, 1, 2, 3, 4, 7, 8])
 
 simulator_results = elfi.Simulator(vectorized_sim, t, X, N, K, r, alphaprior1, alphaprior2,
-                    tau, measurement_times,
+                    tau, measurement_idx,
                     observed=observeddata)
 
 summary = elfi.Summary(logdestack, simulator_results)
@@ -61,6 +58,36 @@ bolfi = elfi.BOLFI(d, batch_size=1, initial_evidence=20, update_interval=10,
                     bounds={'alphaprior1':(0, 5), 'alphaprior2':(0, 5)},
                     acq_noise_var=[0.01, 0.01], seed=1)
 
-post = bolfi.fit(n_evidence=20)
+post = bolfi.fit(n_evidence=40)
 
+bolfi.plot_state()
+plt.savefig("bolfi_state.pdf")
+plt.close()
 
+bolfi.plot_discrepancy()
+plt.savefig("bolfi_discrepancy.pdf")
+plt.close()
+
+post.plot(logpdf=True)
+plt.savefig("posterior.pdf")
+plt.close()
+
+print(bolfi.target_model)
+
+# sample from BOLFI posterior
+sys.stderr.write("Sampling from BOLFI posterior\n")
+result_BOLFI = bolfi.sample(2000, info_freq=1000)
+
+print(result_BOLFI)
+np.savetxt("samples.txt", result_BOLFI.samples_array)
+
+result_BOLFI.plot_traces()
+plt.savefig("posterior_traces.pdf")
+plt.close()
+
+result_BOLFI.plot_pairs()
+plt.savefig("pair_traces.pdf")
+plt.close()
+
+result_BOLFI.plot_marginals()
+plt.savefig("posterior_marginals.pdf")

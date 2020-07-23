@@ -9,13 +9,11 @@ from scipy.integrate import solve_ivp
 import matplotlib.pyplot as plt
 from numpy import *
 import numpy as np
-import gillespy2
-from sdeint import *
 from numba import jit
 import elfi
 import scipy.stats as ss
 from scipy.stats import poisson
-from graphviz import Digraph
+#from graphviz import Digraph
 
 
 
