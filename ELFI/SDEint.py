@@ -31,9 +31,6 @@ def tauNspecies(t, X, N, K, r, alpha, tau):
     for pop in X:
         Xa.append([pop])
 
-    # Xa = [[50], [200], [350]]
-    # Xa[0] = [50]
-    # Xa[0][0] = 50
     t_current = 0
     step_idx = 0
     while (t_current < t):
