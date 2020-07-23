@@ -29,7 +29,8 @@ observeddata = ta, Xa
 #wrap create
 def tauWrapper(t, X, N, K, r, alpha1, alpha2, tau, measurement_times,
                 batch_size=1, random_state=None):
-    alpha = np.array([[1, alpha1], [alpha2, 1])
+
+    alpha = np.array([[1, alpha1], [alpha2, 1]])
     times, pops = tauNspecies(t, X, N, K, r, alpha, tau)
 
     measured_pop = pops[measurement_times, :]
@@ -38,9 +39,9 @@ def tauWrapper(t, X, N, K, r, alpha1, alpha2, tau, measurement_times,
 #tauWrapper(100, [780, 300], 2, [1000,1000], [1,1], array([[1, alphaprior1], [alphaprior2, 1]]), 0.01)
 
 
-def logdestack(final_pop):
-    x = final_pop.flatten().reshape(1, -1)
-    return(np.log(np.fmax(x, np.zeros(x.shape)) + 1))
+def logdestack(final_pop): #reshaping the output
+    x = final_pop.flatten().reshape(1, -1) #flatten turns it into one dimension (1 column) and then reshape makes that into a row so it can be used later on
+    return(np.log(np.fmax(x, np.zeros(x.shape)) + 1)) #taking logs and adding 1 as log0 not possible. fmax ensures any possible negative values are turned into 0
 
 alphaprior1 = elfi.Prior(ss.uniform, 0, 5)
 alphaprior2 = elfi.Prior(ss.uniform, 0, 5)
