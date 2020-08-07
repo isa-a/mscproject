@@ -64,7 +64,7 @@ d = elfi.Distance('euclidean', summary)
 
 bolfi = elfi.BOLFI(d, batch_size=1, initial_evidence=100, update_interval=10,
                     bounds={'alphaprior1':(0, 5), 'alphaprior2':(0, 5), 'alphaprior3':(0, 5), 'alphaprior4':(0, 5), 'alphaprior5':(0, 5), 'alphaprior6':(0, 5)},
-                    acq_noise_var=[0.01, 0.01], seed=1)
+                    acq_noise_var=[0.01, 0.01, 0.01, 0.01, 0.01, 0.01], seed=1)
 
 post = bolfi.fit(n_evidence=500)
 
@@ -83,13 +83,13 @@ post.plot(logpdf=True)
 
 # sample from BOLFI posterior
 sys.stderr.write("Sampling from BOLFI posterior\n")
-result_BOLFI = bolfi.sample(10000, algorithm="metropolis", sigma_proposals=np.array([0.05, 0.05])) #rhat - measure of similarity between 4 chains (attempts at sampling posterior). want it to be close to 1
+result_BOLFI = bolfi.sample(10000, algorithm="metropolis", sigma_proposals=np.array([0.05, 0.05, 0.05, 0.05, 0.05, 0.05])) #rhat - measure of similarity between 4 chains (attempts at sampling posterior). want it to be close to 1
 #effective sample size - want it to be around 200
 
 print(result_BOLFI)
 np.savetxt("samples.txt", result_BOLFI.samples_array)
-print(np.mean(result_BOLFI.samples_array, axis = 0))
-print(np.quantile(result_BOLFI.samples_array, q=[0.025, 0.975], axis = 0))
+#print(np.mean(result_BOLFI.samples_array, axis = 0))
+#print(np.quantile(result_BOLFI.samples_array, q=[0.025, 0.975], axis = 0))
 
 
 result_BOLFI.plot_traces()
