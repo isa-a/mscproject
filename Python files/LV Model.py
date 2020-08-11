@@ -24,15 +24,15 @@ def lotkavolterra(t, X, N, K, r, alpha):
      
 
 #create params
-N = 3
+N = 2
 t = [0,100]
-X =  [750, 900, 1250] 
-K = [1500, 1500, 1500]
-r = [1,1,1]
-alpha = array([[1, 0.5, 0.4], [0.4, 1, 0.63], [1.2, 0, 1]])
+X =  [100, 500] 
+K = [1000,1000]
+r = [1.5,1.5]
+alpha = array([[1, 1.5],[1.3, 1]])
+#alpha = array([[1, 0.5, 0.4], [0.4, 1, 0.63], [1.2, 0, 1]])
 
-
-solve = solve_ivp(lotkavolterra, t, X, args=(N, K, r, alpha), dense_output=True)
+solve = solve_ivp(lotkavolterra, t, X, args=( N, K, r, alpha), dense_output=True)
 
 
 
@@ -41,9 +41,24 @@ def plotODE():
     Xsolve = solve.sol(t)
     plt.plot(t, Xsolve.T)
     plt.legend(['R', 'C','C2'])
+    plt.xlabel('Time')
+    plt.ylabel('Population size')
     plt.title('Lotka-Volterra System')
     plt.show()
 plotODE()
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #############################################################################################
 
