@@ -68,15 +68,15 @@ bolfi = elfi.BOLFI(d, batch_size=1, initial_evidence=100, update_interval=10,
 
 post = bolfi.fit(n_evidence=500)
 
-bolfi.plot_state()
-plt.savefig("bolfi_state.pdf")
-plt.close()
+#bolfi.plot_state()
+#plt.savefig("bolfi_state.pdf")
+#plt.close()
 
 bolfi.plot_discrepancy()
 plt.savefig("bolfi_discrepancy.pdf")
 plt.close()
 
-post.plot(logpdf=True)
+#post.plot(logpdf=True)
 
 #print(bolfi.target_model)
 

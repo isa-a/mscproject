@@ -9,13 +9,11 @@ from scipy.integrate import solve_ivp
 import matplotlib.pyplot as plt
 from numpy import *
 import numpy as np
-import gillespy2
-from sdeint import *
 from numba import jit
 import elfi
 import scipy.stats as ss
 from scipy.stats import poisson
-from graphviz import Digraph
+#from graphviz import Digraph
 
 
 
@@ -31,6 +29,9 @@ def tauNspecies(t, X, N, K, r, alpha, tau):
     for pop in X:
         Xa.append([pop])
 
+    # Xa = [[50], [200], [350]]
+    # Xa[0] = [50]
+    # Xa[0][0] = 50
     t_current = 0
     step_idx = 0
     while (t_current < t):
