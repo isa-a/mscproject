@@ -1,14 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Tue Aug 11 20:20:29 2020
-
-@author: isa
-"""
-
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
 Created on Tue Jul 14 16:23:06 2020
 
 @author: isa
@@ -27,21 +19,22 @@ import sys, os
 #from graphviz import Digraph
 
 #import SDE sim from seperate file and observed data from seperate file
-from data import t, N, K, r, Pops, measurementTimes
-
+from SDEint import tauNspecies
+from data import N, t, tau, X, K, r, Pops, measurement_idx, times
 
 
 observeddata = Pops
 #observeddata = np.loadtxt('testfile.txt')
 
 #wrap create
-def Wrapper(t, N, K, r, alpha1, alpha2, measurementTimes,
+def tauWrapper(t, X, N, K, r, alpha1, alpha2, tau, measurementTimes,
                 batch_size=1, random_state=None):
 
     alpha = np.array([[1, alpha1], [alpha2, 1]])
+   # times, pops = tauNspecies(t, X, N, K, r, alpha, tau)
 
-    measuredPop = np.array(Pops)[:, 8]
-    return(measuredPop)
+    measured_pop = np.array(Pops)[:, measurementTimes]
+    return(measured_pop)
 #tauWrapper(100, [780, 300], 2, [1000,1000], [1,1], array([[1, alphaprior1], [alphaprior2, 1]]), 0.01)
 
 
@@ -52,9 +45,10 @@ def logdestack(final_pop): #reshaping the output
 alphaprior1 = elfi.Prior(ss.uniform, 0, 5)
 alphaprior2 = elfi.Prior(ss.uniform, 0, 5)
 
-vectorized_sim = elfi.tools.vectorize(Wrapper, [0, 1, 2, 3, 4, 7])
+vectorized_sim = elfi.tools.vectorize(tauWrapper, [0, 1, 2, 3, 4, 7, 8])
 
-simulator_results = elfi.Simulator(vectorized_sim, t, N, K, r, alphaprior1, alphaprior2, measurementTimes,
+simulator_results = elfi.Simulator(vectorized_sim, t, X, N, K, r, alphaprior1, alphaprior2,
+                    tau, measurement_idx,
                     observed=observeddata)
 
 summary = elfi.Summary(logdestack, simulator_results)
