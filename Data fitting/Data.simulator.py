@@ -20,7 +20,7 @@ import sys, os
 
 #import SDE sim from seperate file and observed data from seperate file
 from SDEint import tauNspecies
-from data import N, t, tau, X, K, r, Pops, measurement_idx, times
+from data import N, t, tau, X, K, r, Pops, measurement_idx
 
 
 observeddata = Pops
@@ -31,9 +31,9 @@ def tauWrapper(t, X, N, K, r, alpha1, alpha2, tau, measurementTimes,
                 batch_size=1, random_state=None):
 
     alpha = np.array([[1, alpha1], [alpha2, 1]])
-   # times, pops = tauNspecies(t, X, N, K, r, alpha, tau)
+    simtimes, simpops = tauNspecies(t, X, N, K, r, alpha, tau)
 
-    measured_pop = np.array(Pops)[:, measurementTimes]
+    measured_pop = np.array(simpops)[:, measurementTimes]
     return(measured_pop)
 #tauWrapper(100, [780, 300], 2, [1000,1000], [1,1], array([[1, alphaprior1], [alphaprior2, 1]]), 0.01)
 
@@ -77,7 +77,7 @@ plt.close()
 
 # sample from BOLFI posterior
 sys.stderr.write("Sampling from BOLFI posterior\n")
-result_BOLFI = bolfi.sample(10000, algorithm="metropolis", sigma_proposals=np.array([0.05, 0.05])) #rhat - measure of similarity between 4 chains (attempts at sampling posterior). want it to be close to 1
+result_BOLFI = bolfi.sample(100000, algorithm="metropolis", sigma_proposals=np.array([0.05, 0.05])) #rhat - measure of similarity between 4 chains (attempts at sampling posterior). want it to be close to 1
 #effective sample size - want it to be around 200
 
 print(result_BOLFI)
