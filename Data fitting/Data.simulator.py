@@ -22,7 +22,7 @@ import sys, os
 from SDEint import tauNspecies
 from data import N, t, tau, X, K, r, Pops, measurement_idx
 
-
+starttime= time.time()
 observeddata = Pops
 #observeddata = np.loadtxt('testfile.txt')
 
@@ -82,8 +82,8 @@ result_BOLFI = bolfi.sample(100000, algorithm="metropolis", sigma_proposals=np.a
 
 print(result_BOLFI)
 np.savetxt("samples.txt", result_BOLFI.samples_array)
-#print(np.mean(result_BOLFI.samples_array, axis = 0))
-#print(np.quantile(result_BOLFI.samples_array, q=[0.025, 0.975], axis = 0))
+print(np.mean(result_BOLFI.samples_array, axis = 0))
+print(np.quantile(result_BOLFI.samples_array, q=[0.025, 0.975], axis = 0))
 
 
 result_BOLFI.plot_traces()
@@ -96,4 +96,6 @@ plt.close()
 
 result_BOLFI.plot_marginals()
 plt.savefig("posterior_marginals.pdf")
+endtime= time.time()
+print("time elapsed:", endtime - starttime)
 
