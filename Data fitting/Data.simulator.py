@@ -20,7 +20,10 @@ import sys, os
 
 #import SDE sim from seperate file and observed data from seperate file
 from SDEint import tauNspecies
-from data import N, t, tau, X, K, r, Pops, measurement_idx
+#from Akkermansia import N, t, tau, X, K, r, Pops, measurement_idx
+#from Coprobacillus import N, t, tau, X, K, r, Pops, measurement_idx
+from Enterococcus import N, t, tau, X, K, r, Pops, measurement_idx
+
 
 starttime= time.time()
 observeddata = Pops
